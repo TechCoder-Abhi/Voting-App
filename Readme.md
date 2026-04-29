@@ -4,7 +4,7 @@ A backend voting system API built with Node.js, Express, and MongoDB. Users can 
 
 ## Features
 
-✅ User authentication (signup/login) with Aadhar Card Number  
+✅ User authentication (signup/login) with 12-digit Aadhar Card Number  
 ✅ Secure password hashing with bcrypt  
 ✅ JWT-based authorization  
 ✅ View list of all candidates  
@@ -59,6 +59,7 @@ A backend voting system API built with Node.js, Express, and MongoDB. Users can 
    ```bash
    npm start          # Production mode
    npm run dev        # Development mode (with auto-reload)
+   npm test           # Run automated tests
    ```
 
    Server runs on `http://localhost:3000`
@@ -73,9 +74,12 @@ voting_app/
 ├── routes/
 │   ├── userRoutes.js     # User auth & profile endpoints
 │   └── candidateRoutes.js # Candidate CRUD & voting endpoints
+├── test/
+│   └── app.test.js       # API smoke test
+├── app.js                # Express app instance (routes + middleware)
 ├── jwt.js                # JWT middleware & token generation
 ├── db.js                 # MongoDB connection
-├── server.js             # Express app & route setup
+├── server.js             # Startup entrypoint
 ├── package.json          # Dependencies
 ├── .env                  # Environment variables (create locally)
 └── README.md             # This file
@@ -110,7 +114,7 @@ voting_app/
 
 | Method | Endpoint | Description | Auth | Role |
 |--------|----------|-------------|------|------|
-| GET | `/candidate/vote/:candidateID` | Vote for candidate | ✅ | Voter |
+| POST | `/candidate/vote/:candidateID` | Vote for candidate | ✅ | Voter |
 | GET | `/candidate/vote/count` | Get vote counts (sorted) | ❌ | - |
 
 ## User Roles
@@ -131,7 +135,7 @@ Content-Type: application/json
   "email": "john@example.com",
   "mobile": "9999999999",
   "address": "123 Main St",
-  "aadharCardNumber": 123456789012,
+   "aadharCardNumber": "123456789012",
   "password": "password123",
   "role": "voter"
 }
@@ -143,20 +147,20 @@ POST /user/login
 Content-Type: application/json
 
 {
-  "aadharCardNumber": 123456789012,
+   "aadharCardNumber": "123456789012",
   "password": "password123"
 }
 ```
 
 ### Vote for Candidate
 ```bash
-GET /candidate/vote/650f1bc2a1b2c3d4e5f6g7h8
+POST /candidate/vote/650f1bc2a1b2c3d4e5f6g7h8
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
 
 ## Validation Rules
 
-- **Aadhar Card Number**: Must be exactly 12 digits
+- **Aadhar Card Number**: Must be exactly 12 digits and is stored as a string
 - **Password**: Hashed with bcrypt (salt rounds: 10)
 - **Vote**: Each user can vote only once
 - **Admin**: Only one admin user can exist

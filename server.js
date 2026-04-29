@@ -1,21 +1,40 @@
-const express = require('express');
-const app = express();
-const db = require('./db');
 require('dotenv').config();
-
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 3000;
 
-// Import the router files
-const userRoutes = require('./routes/userRoutes');
-const candidateRoutes = require('./routes/candidateRoutes');
+const isValidMongoConnectionString = (value) => {
+    if (!value) {
+        return false;
+    }
 
-// Use the routers
-app.use('/user', userRoutes);
-app.use('/candidate', candidateRoutes);
+    return value.startsWith('mongodb://') || value.startsWith('mongodb+srv://');
+};
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-});
+const requiredEnvVars = ['JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (!isValidMongoConnectionString(process.env.MONGODB_URL) && !isValidMongoConnectionString(process.env.MONGODB_URL_LOCAL)) {
+    missingEnvVars.push('MONGODB_URL_LOCAL or MONGODB_URL');
+}
+
+if (missingEnvVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+}
+
+const app = require('./app');
+
+const startServer = () => {
+    const db = require('./db');
+
+    db.once('connected', () => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port http://localhost:${PORT}`);
+        });
+    });
+};
+
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;

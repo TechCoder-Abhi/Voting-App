@@ -22,9 +22,14 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     aadharCardNumber: {
-        type: Number,
+        type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true,
+        validate: {
+            validator: (value) => /^\d{12}$/.test(value),
+            message: 'Aadhar Card Number must be exactly 12 digits'
+        }
     },
     password: {
         type: String,

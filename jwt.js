@@ -1,5 +1,13 @@
 const jwt = require('jsonwebtoken');
 
+const getJwtSecret = () => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not configured');
+    }
+
+    return process.env.JWT_SECRET;
+};
+
 const jwtAuthMiddleware = (req, res, next) => {
     // First check request headers has authorization or not
     const authorization = req.headers.authorization;
@@ -11,7 +19,7 @@ const jwtAuthMiddleware = (req, res, next) => {
 
     try {
         // Verify the JWT token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
 
         // Attach user information to the request object
         req.user = decoded;
@@ -24,7 +32,7 @@ const jwtAuthMiddleware = (req, res, next) => {
 
 // Function to generate JWT token
 const generateToken = (userData) => {
-    return jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: 30000 });
+    return jwt.sign(userData, getJwtSecret(), { expiresIn: '1h' });
 };
 
 module.exports = { jwtAuthMiddleware, generateToken };
