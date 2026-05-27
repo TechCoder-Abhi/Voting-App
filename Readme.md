@@ -1,170 +1,157 @@
-# Voting Application
+# Voting App
 
-A backend voting system API built with Node.js, Express, and MongoDB. Users can authenticate and vote for candidates while admins manage the candidate list.
+A full‑stack voting system with a Node.js/Express backend and a Vite + React frontend. Users can register/login, view candidates, and cast one vote each; admins can manage candidates.
+
+## Quicklinks
+
+- Backend entry: [server.js](server.js)
+- Frontend app: [frontend](frontend)
+- Database config: [db.js](db.js)
+
+## Live demos
+
+- Backend (production): https://voting-platfrom.onrender.com/
+- Frontend (production): https://votingplatfrom.vercel.app/
 
 ## Features
 
-✅ User authentication (signup/login) with 12-digit Aadhar Card Number  
-✅ Secure password hashing with bcrypt  
-✅ JWT-based authorization  
-✅ View list of all candidates  
-✅ Vote for candidates (one vote per user)  
-✅ Admin functionality: add/update/delete candidates  
-✅ Admins cannot vote  
-✅ Vote counting and ranking  
+- User signup & login (Aadhar number as identifier)
+- Secure password hashing with `bcrypt`
+- JWT-based authentication
+- Candidate CRUD for admins
+- One vote per user; vote counting and ranking
 
-## Technologies Used
+## Tech Stack
 
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB ORM
-- **JWT (jsonwebtoken)** - Authentication
-- **bcrypt** - Password hashing
+- Node.js + Express
+- MongoDB + Mongoose
+- Vite + React (frontend)
+- JWT (`jsonwebtoken`) and `bcrypt`
 
-## Installation & Setup
+## Prerequisites
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
+- Node.js 14+ and npm
+- MongoDB (local `mongod` or Atlas)
 
-### Steps
+## Environment
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/voting_app.git
-   cd voting_app
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables:**
-   Create a `.env` file in the root directory:
-   ```env
-   PORT=3000
-   MONGODB_URL_LOCAL=mongodb://localhost:27017/votingapp
-   MONGODB_URL=your_mongodb_atlas_connection_string
-   JWT_SECRET=your_secret_jwt_key_here
-   ```
-
-4. **Ensure MongoDB is running:**
-   - For local MongoDB: `mongod`
-   - For MongoDB Atlas: Add connection string to `.env`
-
-5. **Start the server:**
-   ```bash
-   npm start          # Production mode
-   npm run dev        # Development mode (with auto-reload)
-   npm test           # Run automated tests
-   ```
-
-   Server runs on `http://localhost:3000`
-
-## Project Structure
+Create a `.env` file in the project root. Minimal variables used by the app:
 
 ```
-voting_app/
-├── models/
-│   ├── user.js           # User schema with password hashing
-│   └── candidates.js     # Candidate schema with votes tracking
-├── routes/
-│   ├── userRoutes.js     # User auth & profile endpoints
-│   └── candidateRoutes.js # Candidate CRUD & voting endpoints
-├── test/
-│   └── app.test.js       # API smoke test
-├── app.js                # Express app instance (routes + middleware)
-├── jwt.js                # JWT middleware & token generation
-├── db.js                 # MongoDB connection
-├── server.js             # Startup entrypoint
-├── package.json          # Dependencies
-├── .env                  # Environment variables (create locally)
-└── README.md             # This file
+PORT=3000
+MONGODB_URL=mongodb://localhost:27017/votingapp
+JWT_SECRET=your_jwt_secret_here
+VITE_API_BASE_URL=http://localhost:3000  # optional: frontend override
 ```
 
-## API Endpoints
+Note: The backend reads `.env` at startup using `dotenv`.
 
-### Authentication
+## Install & Run (local development)
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/user/signup` | Register a new user | ❌ |
-| POST | `/user/login` | Login & get JWT token | ❌ |
+1. Install root (backend) deps:
 
-### User Profile
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/user/profile` | Get logged-in user's profile | ✅ |
-| PUT | `/user/profile/password` | Change password | ✅ |
-
-### Candidates
-
-| Method | Endpoint | Description | Auth | Role |
-|--------|----------|-------------|------|------|
-| GET | `/candidate` | List all candidates | ❌ | - |
-| POST | `/candidate` | Add new candidate | ✅ | Admin |
-| PUT | `/candidate/:candidateID` | Update candidate | ✅ | Admin |
-| DELETE | `/candidate/:candidateID` | Delete candidate | ✅ | Admin |
-
-### Voting
-
-| Method | Endpoint | Description | Auth | Role |
-|--------|----------|-------------|------|------|
-| POST | `/candidate/vote/:candidateID` | Vote for candidate | ✅ | Voter |
-| GET | `/candidate/vote/count` | Get vote counts (sorted) | ❌ | - |
-
-## User Roles
-
-- **Admin**: Can create, update, and delete candidates. Cannot vote.
-- **Voter**: Can view candidates and vote once.
-
-## Example Requests
-
-### Sign Up
 ```bash
-POST /user/signup
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "age": 25,
-  "email": "john@example.com",
-  "mobile": "9999999999",
-  "address": "123 Main St",
-   "aadharCardNumber": "123456789012",
-  "password": "password123",
-  "role": "voter"
-}
+npm install
 ```
 
-### Login
+2. Install frontend deps:
+
 ```bash
-POST /user/login
-Content-Type: application/json
-
-{
-   "aadharCardNumber": "123456789012",
-  "password": "password123"
-}
+npm --prefix frontend install
 ```
 
-### Vote for Candidate
+3. Start MongoDB (if running locally):
+
 ```bash
-POST /candidate/vote/650f1bc2a1b2c3d4e5f6g7h8
-Authorization: Bearer YOUR_JWT_TOKEN
+# on Linux/macOS
+mongod --dbpath ./data
+
+# or on Windows use the MongoDB Server service or the MongoDB Compass / Atlas connection
 ```
 
-## Validation Rules
+4. Run backend in development (auto-reloads with nodemon):
 
-- **Aadhar Card Number**: Must be exactly 12 digits and is stored as a string
-- **Password**: Hashed with bcrypt (salt rounds: 10)
-- **Vote**: Each user can vote only once
-- **Admin**: Only one admin user can exist
+```bash
+npm run dev
+```
 
-## Version
+5. Run frontend in development (Vite):
 
-**v1.0.0** - Initial release
+```bash
+npm run frontend:dev
+```
+
+6. Production / build frontend:
+
+```bash
+npm run frontend:build
+# serve the generated `frontend/dist` with a static server or host on Vercel
+```
+
+7. Tests:
+
+```bash
+npm test
+```
+
+Default servers:
+
+- Backend: `http://localhost:3000`
+- Frontend (Vite dev): `http://localhost:5173`
+
+## Verified NPM scripts
+
+From the project root `package.json`:
+
+- `npm start` — run `node server.js` (production)
+- `npm run dev` — run `nodemon server.js` (development)
+- `npm run frontend:dev` — run the frontend dev server (`npm --prefix frontend run dev`)
+- `npm run frontend:build` — build the frontend (`npm --prefix frontend run build`)
+- `npm test` — run Node's test runner (`node --test`)
+
+## API overview
+
+Auth:
+
+- POST `/user/signup` — register (no auth)
+- POST `/user/login` — login, returns JWT
+
+User:
+
+- GET `/user/profile` — get profile (auth)
+- PUT `/user/profile/password` — change password (auth)
+
+Candidates & Voting:
+
+- GET `/candidate` — list candidates
+- POST `/candidate` — add candidate (admin)
+- PUT `/candidate/:candidateID` — update candidate (admin)
+- DELETE `/candidate/:candidateID` — delete candidate (admin)
+- POST `/candidate/vote/:candidateID` — vote for candidate (auth)
+- GET `/candidate/vote/count` — get vote counts
+
+See the route handlers in [routes](routes) for details.
+
+## Project structure (short)
+
+```
+.
+├─ frontend/        # Vite + React app
+├─ models/          # Mongoose schemas
+├─ routes/          # Express route handlers
+├─ test/            # Tests (node --test)
+├─ server.js        # App bootstrap
+├─ app.js           # Express app & middleware
+├─ db.js            # DB connection
+└─ package.json
+```
+
+## Deployment notes
+
+- Frontend can be deployed to Vercel from the `frontend` folder (set `VITE_API_BASE_URL`).
+- Backend can be deployed to Render, Heroku, or similar; ensure `MONGODB_URL` and `JWT_SECRET` are configured in environment settings.
+
+## Contributing
+
+- Open an issue or PR with a clear description.
+- Run tests before submitting: `npm test`.
